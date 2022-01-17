@@ -1,4 +1,5 @@
 # image processing library
+from cgitb import reset
 import cv2
 import glob
 import cv2 as cv
@@ -6,7 +7,7 @@ import cv2 as cv
 # math and array functions
 import numpy as np
 
-class light_tracker:
+class camera_controller:
     
     def __init__(self):
         
@@ -14,8 +15,8 @@ class light_tracker:
         self.positions_x = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         self.positions_y = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-        self.lower_light_threshold = np.array([90, 90, 90])
-        self.upper_light_threshold = np.array([255,255,255])
+        self.lower_light_threshold = np.array([60,60,100])
+        self.upper_light_threshold = np.array([200,200,255])
 
         self.smoothed_location_x = 0.0
         self.smoothed_location_y = 0.0
@@ -88,9 +89,9 @@ class light_tracker:
         self.dist = dist
 
     
-    def update(self, video):
+    def update(self, frame):
         
-        ret, frame = video.read()
+        
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         
         mask = cv2.inRange(rgb, self.lower_light_threshold, self.upper_light_threshold)
@@ -171,7 +172,6 @@ class light_tracker:
         
         # shows number of light points detected
         res = cv2.putText(res, f"light zones: {loc_count}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
-
         
         self.video_out = res
     

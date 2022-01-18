@@ -1,5 +1,6 @@
 # image processing library
 from cgitb import reset
+import os
 import cv2
 import glob
 import cv2 as cv
@@ -15,7 +16,7 @@ class camera_controller:
         self.positions_x = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         self.positions_y = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-        self.lower_light_threshold = np.array([60,60,100])
+        self.lower_light_threshold = np.array([100,100,125])
         self.upper_light_threshold = np.array([200,200,255])
 
         self.smoothed_location_x = 0.0
@@ -26,9 +27,7 @@ class camera_controller:
     def calibrate_camera(self, images_folder):
         # stolen from https://temugeb.github.io/opencv/python/2021/02/02/stereo-camera-calibration-and-triangulation.html
         
-        images_names = sorted(glob.glob(images_folder))
-        images = []
-        for imname in images_names:
+        
             im = cv.imread(imname, 1)
             images.append(im)
     
@@ -36,8 +35,8 @@ class camera_controller:
         #Change this if the code can't find the checkerboard
         criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
     
-        rows = 5 #number of checkerboard rows.
-        columns = 8 #number of checkerboard columns.
+        rows = 6 #number of checkerboard rows.
+        columns = 6 #number of checkerboard columns.
         world_scaling = 1. #change this to the real world square size. Or not.
     
         #coordinates of squares in the checkerboard world space
@@ -128,10 +127,10 @@ class camera_controller:
                     
                     # if the light that we are seeing is close to the current position estimate, chances are that its the light we are looking for, so we increase this measurement's weight
                     if xls_10 >= self.smoothed_location_x - 100 and xls_10 <= self.smoothed_location_x + 100 and yls_10 >= self.smoothed_location_y - 100 and yls_10 <= self.smoothed_location_y + 100:
-                        rough_location_x += xls_10*2
-                        rough_location_y += yls_10*2
+                        rough_location_x += xls_10*4
+                        rough_location_y += yls_10*4
                         
-                        loc_count += 2
+                        loc_count += 4
             
         # if there are bright pixels that we detected      
         if loc_count > 0:
@@ -150,14 +149,14 @@ class camera_controller:
             self.positions_x[0] = rough_location_x
             self.positions_y[0] = rough_location_y
             
-            smoothed_location_x = sum(self.positions_x) / len(self.positions_x)
-            smoothed_location_y = sum(self.positions_y) / len(self.positions_y)
+            smoothed_location_x = sum(self.positions_x) / 10 # len(self.positions_x)
+            smoothed_location_y = sum(self.positions_y) / 10 # len(self.positions_y)
             
             # bias the raw position with our smoothed position estimate
-            self.positions_x[0] = rough_location_x*0.5 + self.smoothed_location_x*0.5
-            self.positions_y[0] = rough_location_y*0.5 + self.smoothed_location_y*0.5
+            self.positions_x[0] = rough_location_x # + self.smoothed_location_x*0.2
+            self.positions_y[0] = rough_location_y # + self.smoothed_location_y*0.2
             
-            self.r = (((max(self.positions_x) - min(self.positions_x)) ** 2 + (max(self.positions_y) - min(self.positions_y)) ** 2) ** 0.5)*0.5 + self.r*0.5
+            self.r = (((max(self.positions_x) - min(self.positions_x)) ** 2 + (max(self.positions_y) - min(self.positions_y)) ** 2) ** 0.5)*0.2 + self.r*0.8
                 
             mask = cv2.circle(res, [int(smoothed_location_y), int(smoothed_location_x)], 20 + int(self.r), [255, 255, 255], 5)
         

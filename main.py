@@ -20,6 +20,8 @@ vid_2.set(10,0.5)
 cam_1: camera_controller = camera_controller()
 cam_2: camera_controller = camera_controller()
 
+cam_1.calibrate_camera()
+
 while True:
     _1, frame_raw_1 = vid_1.read()
     _2, frame_raw_2 = vid_2.read()
@@ -31,23 +33,8 @@ while True:
     
     
     
-#     clear()
+    clear()
     
-#     print(f'''
-# locations x:
-# {cam_1.positions_x}
-# locations y:
-# {cam_1.positions_y}
-
-# ''')
-    
-#     print(f'''
-# locations x:
-# {cam_2.positions_x}
-# locations y:
-# {cam_2.positions_y}
-
-# ''')
     
     if cv2.waitKey(1) & 0xFF == ord('q'):
         # cv2.imwrite('frame1_3.jpg', frame_raw_1)

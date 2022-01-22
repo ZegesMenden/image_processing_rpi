@@ -24,12 +24,18 @@ class camera_controller:
         
         self.r = 0.0
         
-    def calibrate_camera(self, images_folder):
+    def calibrate_camera(self):
         # stolen from https://temugeb.github.io/opencv/python/2021/02/02/stereo-camera-calibration-and-triangulation.html
-        
-        
-            im = cv.imread(imname, 1)
-            images.append(im)
+        images = []
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+            
+        os.chdir('calib_frames/c1/')
+        im = cv.imread('frame1_1.jpg', 1)
+        images.append(im)
+        im = cv.imread('frame1_2.jpg', 1)
+        images.append(im)
+        im = cv.imread('frame1_3.jpg', 1)
+        images.append(im)
     
         #criteria used by checkerboard pattern detector.
         #Change this if the code can't find the checkerboard
@@ -56,6 +62,7 @@ class camera_controller:
     
     
         for frame in images:
+            cv.imshow('img', frame)
             gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     
             #find the checkerboard
@@ -77,15 +84,15 @@ class camera_controller:
  
  
  
-        ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, (width, height), None, None)
-        print('rmse:', ret)
-        print('camera matrix:\n', mtx)
-        print('distortion coeffs:', dist)
-        print('Rs:\n', rvecs)
-        print('Ts:\n', tvecs)
+        # ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, (width, height), None, None)
+        # print('rmse:', ret)
+        # print('camera matrix:\n', mtx)
+        # print('distortion coeffs:', dist)
+        # print('Rs:\n', rvecs)
+        # print('Ts:\n', tvecs)
     
-        self.mtx = mtx
-        self.dist = dist
+        # self.mtx = mtx
+        # self.dist = dist
 
     
     def update(self, frame):
